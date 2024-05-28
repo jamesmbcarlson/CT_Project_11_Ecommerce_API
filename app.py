@@ -5,6 +5,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_swagger_ui import get_swaggerui_blueprint
 from database import db
 from schemas import ma
 from limiter import limiter
@@ -23,6 +24,15 @@ from routes.orderBP import order_blueprint
 from routes.shoppingCartBP import shopping_cart_blueprint
 from routes.loginBP import login_blueprint
 
+
+SWAGGER_URL = '/api/docs' # URL for exposing Swagger UI
+API_URL = '/static/swagger.yaml' # Pth to the YAML file
+
+swaggerui_blueprint = get_swaggerui_blueprint(
+    SWAGGER_URL,
+    API_URL,
+    config={'app_name': 'CT E-Commerce API'}
+)
 
 def create_app(config_name):
     app = Flask(__name__)
@@ -46,6 +56,7 @@ def blueprint_config(app):
     app.register_blueprint(order_blueprint, url_prefix='/orders')
     app.register_blueprint(shopping_cart_blueprint, url_prefix='/cart')
     app.register_blueprint(login_blueprint, url_prefix='/login')
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 def config_rate_limit():
     limiter.limit("100 per day")(customer_blueprint)

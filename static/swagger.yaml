@@ -1,0 +1,204 @@
+swagger: '2.0'
+info:
+  title: 'CT Project E-Commerce API'
+  description: 'An API to manage E-Commerce. This project was made by James Carlson for an assignment from Coding Temple.'
+  version: '1.0.0'
+host: '127.0.0.1:5000'
+schemes:
+  - 'http'
+consumes: 
+  - 'application/json'
+produces:
+  - 'application/json'
+paths: 
+  /login/:
+    post:
+      summary: "Token Endpoint"
+      description: "Simulates login. Endpoint for user authentication. Matching username/password must be entered."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Matching username and password for login"
+          required: true
+          schema:
+            $ref: "#/definitions/TokenCredentials"
+      responses:
+        200:
+          description: "Login Successful"
+          schema:
+            $ref: "#/definitions/TokenResponse"
+          examples:
+            application/json:
+              status: "success"
+              messsage: "You have successfully authenticated yourself"
+              token: "eyJhbGciJkeMAK1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTY1Njk1ODUsImaJmMTcxNjU2NTk4NSwic3ViIjoxfQ.qcNLua5V9JHGNdkemandKdkWEUvgSWeuQBR2EMNl7Jo"
+        401:
+          description: "Unsuccessful login"
+          schema:
+            $ref: "#/definitions/TokenResponse"
+          examples:
+            application/json:
+              status: "error"
+              message: "Username and/or password is incorrect"
+  /customers/:
+    post:
+      summary: "Create a new customer"
+      description: "Will add a new customer to the database"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Create customer object"
+          required: true
+          schema:
+            $ref: "#/definitions/CustomerRequest"
+      responses:
+        201:
+          description: 'Customer Created'
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+        400:
+          description: 'Username Taken'
+          examples:
+            application/json:
+              error: "Username is already taken. Please create a unique username."
+    get:
+      summary: "Get Customers Endpoint"
+      description: "Get all customer data from customer table"
+      parameters:
+        - in: query
+          name: page
+          type: "integer"
+          description: "Page of customer objects"
+          required: false
+        - in: query
+          name: per_page
+          type: "integer"
+          description: "Number of customer objects per page"
+          required: false
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/CustomerResponse"
+  /customers/{customer_id}:
+    get:
+      summary: "Get Customer Endpoint"
+      description: "Get one customer's data by ID"
+      parameters:
+        - name: customer_id
+          in: path
+          description: "ID of customer to fetch"
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+    put:
+      summary: "Update Customer Endpoint"
+      description: "Update customer's data at ID"
+      parameters:
+        - name: customer_id
+          in: path
+          description: "ID of customer to update"
+        - in: "body"
+          name: "body"
+          description: "Update customer data with any field"
+          schema:
+            $ref: "#/definitions/CustomerRequest"
+      responses:
+        201:
+          description: "CREATED"
+          schema:
+            $ref: "#/definitions/CustomerResponse"
+    delete:
+      summary: "Delete Customer Endpoint"
+      description: "Delete customer at ID"
+      parameters:
+        - name: customer_id
+          in: path
+          description: "ID of customer to update"
+      responses:
+        201:
+          description: "CREATED"
+          examples:
+            application/json:
+              message: "Customer with ID 10 has been removed"
+              status: "success"
+definitions: 
+  TokenCredentials:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+        description: "The username of the user"
+      password:
+        type: "string"
+        format: "password"
+        description: "The password associated with username"
+    required:
+      - "username"
+      - "password"
+  TokenResponse:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+        description: "Status of the operation"
+      message:
+        type: "string"
+        description: "Message indicating the success or failure"
+      token:
+        type: "string"
+        description: "Authenticated token"
+  UnauthorizedError:
+    type: "object"
+    properties:
+      error:
+        type: "string"
+        description: "The description of the error"
+        example: "Invalid token. Please try again"
+  Customer:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Customer's full name"
+        example: "James Carlson"
+      email:
+        type: "string"
+        description: "Customer's email address"
+        example: "jamesmbcarlson@gmail.com"
+      phone:
+        type: "string"
+        description: "Customer's phone number"
+        example: "(719)555-8556"
+      username:
+        type: "string"
+        description: "Customer's username"
+        example: "jimjamsupreme"
+  CustomerResponse:
+    allOf:
+      - $ref: '#/definitions/Customer'
+      - type:
+        properties:
+          id:
+            type: "integer"
+            description: "Customer's unique ID"
+            readonly: true
+  CustomerRequest:
+    allOf:
+      - $ref: "#/definitions/Customer"
+      - type:
+        properties:
+          password:
+            type: "string"
+            description: "Customer's password"
+            example: "Password123!"
+      
+securityDefinitions:
+  bearerAuth:
+    type: apiKey
+    name: Authorization
+    in: header

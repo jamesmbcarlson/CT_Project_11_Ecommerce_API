@@ -23,8 +23,14 @@ def create_customer():
 @cache.cached(timeout=20)
 @token_auth.login_required
 def get_all():
-    customers = customerService.get_all()
+    # get pagination parameters (or set to default)
+    args = request.args
+    page = args.get('page', 1, type=int)
+    per_page = args.get('per_page', 10, type=int)
+    customers = customerService.get_all(page, per_page)
     return customers_schema.jsonify(customers), 200
+
+    
 
 # get one customer by ID
 @token_auth.login_required
