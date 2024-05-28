@@ -79,7 +79,7 @@ def checkout():
         shoppingCartService.checkout()
         return "You have successfully placed an order!"
     except NoResultFound as err:
-        return jsonify({"error": str(err)}), 400
+        return jsonify({"error": str(err)}), 404
 
 # set cart to manage, with id
 @token_auth.login_required 

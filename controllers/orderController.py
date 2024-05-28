@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from sqlalchemy.exc import NoResultFound
 from schemas.orderSchema import order_schema, orders_schema
 from services import orderService
 from marshmallow import ValidationError
@@ -6,7 +7,7 @@ from caching import cache
 from auth import token_auth
 
 # place order / create new order
-# in this application, orders are placed via theshoppingCartService checkout method
+# in this application, orders are placed via the shoppingCartService checkout method
 @token_auth.login_required
 def create_order():
     pass
@@ -34,6 +35,7 @@ def find_all():
     return orders_schema.jsonify(orders), 200
 
 # get one order by ID
+@token_auth.login_required
 def get_order(order_id):
     order = orderService.get_order(order_id)
     if order:
@@ -44,11 +46,19 @@ def get_order(order_id):
             "message": f"A order with ID {order_id} does not exist"
         }
         return resp, 404
-    
+
+# get status of order by id
+@token_auth.login_required
+def track_order(order_id):
+    try:
+        return orderService.track_order(order_id)
+    except NoResultFound as err:
+        return jsonify({"error": str(err)}), 404
+
+
+
 # TO-DO: 
 # Manage Order History (Bonus): Create an endpoint that allows customers to access their order history, listing all previous orders placed. Each order entry should provide comprehensive information, including the order date and associated products.
     # take in customer ID, return list of orders
 # Cancel Order (Bonus): Implement an order cancellation feature, allowing customers to cancel an order if it hasn't been shipped or completed. Ensure that canceled orders are appropriately reflected in the system.
     # take in order ID, set cancellation of order to false if not shipped or already completed
-# Calculate Order Total Price (Bonus): Include an endpoint that calculates the total price of items in a specific order, considering the prices of the products included in the order. This calculation should be specific to each customer and each order, providing accurate pricing information.
-    # this will be necessary to complete elsewhere (shopping checkout/order creation), so I may not make it an endpoint

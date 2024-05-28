@@ -25,6 +25,7 @@ def create_product():
         return jsonify({"error": "product could not be saved"}), 400
     
 # get all products
+@token_auth.login_required
 @cache.cached(timeout=20)
 def find_all():
     # get pagination parameters (or set to default)
@@ -35,6 +36,7 @@ def find_all():
     return products_schema.jsonify(products), 200
 
 # get one product by ID
+@token_auth.login_required
 def get_product(product_id):
     product = productService.get_product(product_id)
     if product:
