@@ -19,6 +19,7 @@ def create_cart():
         return jsonify({'error': str(err)}), 400
 
 # get one shopping_cart by ID
+@token_auth.login_required 
 def get_shopping_cart(shopping_cart_id):
     shopping_cart = shoppingCartService.get_cart(shopping_cart_id)
     if shopping_cart:
@@ -29,7 +30,9 @@ def get_shopping_cart(shopping_cart_id):
             "message": f"A shopping cart with ID {shopping_cart_id} does not exist"
         }
         return resp, 404
-    
+
+# add product to cart with id
+@token_auth.login_required 
 def add_to_cart(product_id):
     # TO-DO: ADD VALIDATION
     try:
@@ -40,6 +43,8 @@ def add_to_cart(product_id):
     except NoResultFound as err:
         return jsonify({"error": str(err)}), 404
 
+# remove product from cart with id
+@token_auth.login_required 
 def remove_from_cart(product_id):
     # TO-DO: ADD VALIDATION
     try:
@@ -48,6 +53,8 @@ def remove_from_cart(product_id):
     except NoResultFound as err:
         return jsonify({"error": str(err)}), 404
 
+# change quantity of item in cart with id and json body
+@token_auth.login_required 
 def update_item_qty(product_id):
     try:
         update_data = update_product_quantity_schema.load(request.json)
@@ -56,6 +63,8 @@ def update_item_qty(product_id):
     except NoResultFound as err:
         return jsonify({"error": str(err)}), 404
 
+# empty cart of all products
+@token_auth.login_required 
 def empty_cart():
     try:
         shoppingCartService.empty_cart()
@@ -63,6 +72,8 @@ def empty_cart():
     except NoResultFound as err:
         return jsonify({"error": str(err)}), 404
 
+# checkout with cart, deleting cart, creating order
+@token_auth.login_required 
 def checkout():
     try:
         shoppingCartService.checkout()
@@ -70,6 +81,8 @@ def checkout():
     except NoResultFound as err:
         return jsonify({"error": str(err)}), 400
 
+# set cart to manage, with id
+@token_auth.login_required 
 def set_active_cart(shopping_cart_id):
     # TO-DO: ADD VALIDATION
     shoppingCartService.set_current_cart(shopping_cart_id)
@@ -77,6 +90,7 @@ def set_active_cart(shopping_cart_id):
     
 
 # get all shopping_carts
+@token_auth.login_required 
 def find_all():
     # get pagination parameters (or set to default)
     args = request.args

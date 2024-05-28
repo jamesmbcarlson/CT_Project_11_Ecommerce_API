@@ -6,22 +6,25 @@ from caching import cache
 from auth import token_auth
 
 # place order / create new order
+# in this application, orders are placed via theshoppingCartService checkout method
 @token_auth.login_required
 def create_order():
-    try:
-        raw_data = request.json
-        logged_in_user = token_auth.current_user()
-        raw_data['customer_id'] = logged_in_user.id
-        order_data = order_schema.load(raw_data)
-        order_save = orderService.create_order(order_data)
-        return order_schema.jsonify(order_save), 201
-    except ValidationError as err:
-        return jsonify(err.messages), 400
-    except ValueError as err:
-        return jsonify({'error': str(err)}), 400
+    pass
+    # try:
+    #     raw_data = request.json
+    #     logged_in_user = token_auth.current_user()
+    #     raw_data['customer_id'] = logged_in_user.id
+    #     order_data = order_schema.load(raw_data)
+    #     order_save = orderService.create_order(order_data)
+    #     return order_schema.jsonify(order_save), 201
+    # except ValidationError as err:
+    #     return jsonify(err.messages), 400
+    # except ValueError as err:
+    #     return jsonify({'error': str(err)}), 400
 
 # get all orders
-# @cache.cached(timeout=20) # took this out for smoother testing
+@cache.cached(timeout=20)
+@token_auth.login_required
 def find_all():
     # get pagination parameters (or set to default)
     args = request.args

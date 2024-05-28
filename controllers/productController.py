@@ -4,8 +4,10 @@ from schemas.productSchema import product_schema, products_schema, product_updat
 from services import productService
 from marshmallow import ValidationError
 from caching import cache
+from auth import token_auth
 
 # create new product
+@token_auth.login_required 
 def create_product():
     try:
         # Validate and deserialize the request data
@@ -45,6 +47,7 @@ def get_product(product_id):
         return resp, 404
     
 # update product at id
+@token_auth.login_required
 def update_product(product_id):
     try:
         # Validate and deserialize the request data
@@ -58,6 +61,7 @@ def update_product(product_id):
 
 
 # delete product at id
+@token_auth.login_required
 def delete_product(product_id):
     try:
         productService.delete_product(product_id)
