@@ -276,7 +276,7 @@ def checkout():
                         order_id=new_order.id,
                         product_id=data[0],
                         quantity=data[1])
-                db.session.execute(add_new_order_prd_statement)  
+                session.execute(add_new_order_prd_statement)  
             session.commit()
 
 # Get all shopping_carts in database
