@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   title: 'CT Project E-Commerce API'
-  description: 'An API to manage E-Commerce. This project was made by James Carlson for an assignment from Coding Temple.'
+  description: 'An API to manage E-Commerce. This project was made by James Carlson as an assignment for Coding Temple.'
   version: '1.0.0'
 host: '127.0.0.1:5000'
 schemes:
@@ -126,6 +126,88 @@ paths:
             application/json:
               message: "Customer with ID 10 has been removed"
               status: "success"
+  /products/:
+    post:
+      summary: "Create a new product"
+      description: "Will add a new product to the database"
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Create product object"
+          required: true
+          schema:
+            $ref: "#/definitions/Product"
+      responses:
+        201:
+          description: 'Product Created'
+          schema:
+            $ref: "#/definitions/Product"
+    get:
+      summary: "Get Products Endpoint"
+      description: "Get all product data from product table"
+      parameters:
+        - in: query
+          name: page
+          type: "integer"
+          description: "Page of product objects"
+          required: false
+        - in: query
+          name: per_page
+          type: "integer"
+          description: "Number of product objects per page"
+          required: false
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Product"
+  /products/{product_id}:
+    get:
+      summary: "Get Product Endpoint"
+      description: "Get one product's data by ID"
+      parameters:
+        - name: product_id
+          in: path
+          description: "ID of product to fetch"
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            $ref: "#/definitions/Product"
+    put:
+      summary: "Update Product Endpoint"
+      description: "Update product's data at ID"
+      parameters:
+        - name: product_id
+          in: path
+          description: "ID of product to update"
+        - in: "body"
+          name: "body"
+          description: "Update product data with any field"
+          schema:
+            $ref: "#/definitions/Product"
+      responses:
+        201:
+          description: "CREATED"
+          schema:
+            $ref: "#/definitions/Product"
+    delete:
+      summary: "Delete Product Endpoint"
+      description: "Delete product at ID"
+      parameters:
+        - name: product_id
+          in: path
+          description: "ID of product to update"
+      responses:
+        201:
+          description: "CREATED"
+          examples:
+            application/json:
+              message: "Product with ID 10 has been removed"
+              status: "success"
+
 definitions: 
   TokenCredentials:
     type: "object"
@@ -196,6 +278,21 @@ definitions:
             type: "string"
             description: "Customer's password"
             example: "Password123!"
+  Product:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+        description: "Product name"
+        example: "Steam Deck"
+      price:
+        type: "float"
+        description: "Product price"
+        example: "649.99"
+      stock_quantity:
+        type: "integer"
+        description: "Number of products available"
+        example: "42"
       
 securityDefinitions:
   bearerAuth:
