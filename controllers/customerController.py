@@ -6,11 +6,11 @@ from marshmallow import ValidationError
 from caching import cache
 
 # create new customer
-def save():
+def create_customer():
     try:
         # Validate and deserialize the request data
         customer_data = customer_input_schema.load(request.json)
-        customer_save = customerService.save(customer_data)
+        customer_save = customerService.create_customer(customer_data)
         return customer_output_schema.jsonify(customer_save), 201
     except ValidationError as err:
         return jsonify(err.messages), 400
@@ -19,8 +19,8 @@ def save():
 
 # get all customers
 @cache.cached(timeout=20)
-def find_all():
-    customers = customerService.find_all()
+def get_all():
+    customers = customerService.get_all()
     return customers_schema.jsonify(customers), 200
 
 # get one customer by ID

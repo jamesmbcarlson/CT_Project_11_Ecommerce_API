@@ -1,9 +1,9 @@
 from flask import Blueprint
-from controllers.orderController import save, find_all, get_order
+from controllers.orderController import create_order, find_all, get_order
 
 order_blueprint = Blueprint("order_bp", __name__)
 
-order_blueprint.route('/', methods=['POST'])(save)
+order_blueprint.route('/', methods=['POST'])(create_order)
 order_blueprint.route('/', methods=['GET'])(find_all)
 order_blueprint.route('/<order_id>', methods=['GET'])(get_order) # view order at id
 

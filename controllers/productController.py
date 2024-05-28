@@ -6,7 +6,7 @@ from marshmallow import ValidationError
 from caching import cache
 
 # create new product
-def save():
+def create_product():
     try:
         # Validate and deserialize the request data
         product_data = product_schema.load(request.json)
@@ -14,13 +14,13 @@ def save():
         return jsonify(err.messages), 400
     
     # Call the save service with the product data
-    product_save = productService.save(product_data)
+    product_save = productService.create_product(product_data)
     # Check to see that the product_save is a product and not None
     if product_save is not None:
         # Serialize the product data and return with a 201 success
         return product_schema.jsonify(product_save), 201
     else:
-        return jsonify({"Message": "product_save is None"}), 400
+        return jsonify({"error": "product could not be saved"}), 400
     
 # get all products
 @cache.cached(timeout=20)

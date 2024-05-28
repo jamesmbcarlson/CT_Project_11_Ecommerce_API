@@ -5,7 +5,7 @@ from database import db
 from models.product import Product
 
 # Create new product
-def save(product_data):
+def create_product(product_data):
     with Session(db.engine) as session:
         with session.begin():
             new_product = Product(

@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from utils.util import encode_token
 
 # Create new customer
-def save(customer_data):
+def create_customer(customer_data):
     with Session(db.engine) as session:
         with session.begin():
             # check if username is already in database
@@ -30,7 +30,7 @@ def save(customer_data):
         return new_customer
 
 # Get all customers in database
-def find_all(page=1, per_page=10):
+def get_all(page=1, per_page=10):
     query = db.select(Customer).limit(per_page).offset((page-1)*per_page)
     customers = db.session.execute(query).scalars().all()
     return customers
@@ -91,6 +91,7 @@ def get_token(username, password):
     customer = db.session.execute(query).scalars().first()
     # validate password for paired username
     if customer is not None and check_password_hash(customer.password, password):
+        print("CUSTOMER ID", customer.id)
         auth_token = encode_token(customer.id)
         return auth_token
     else:

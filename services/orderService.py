@@ -1,32 +1,50 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from database import db
+from datetime import datetime
+from random import random
 from models.order import Order
 from models.customer import Customer
 from models.product import Product
 
 # Creates new order
-def save(order_data):
+def create_order(order_data):
     with Session(db.engine) as session:
         with session.begin():
+            # Check that the customer_id is associated with a customer
+            customer_id = order_data['customer_id']
+            customer = session.get(Customer, customer_id)
+            if not customer:
+                raise ValueError(f"Customer with ID {customer_id} does not exist")
+
             # Get all of the product_ids from the order_data products
             product_ids = [prod['id'] for prod in order_data['products']]
             product_query = select(Product).where(Product.id.in_(product_ids))
             products = session.execute(product_query).scalars().all()
-
             # Make sure all of the products exist and were queried
             if len(product_ids) != len(products):
                 raise ValueError("One or more products do not exist")
             
-            # Check that the customer_id is associated with a customer
-            customer_id = order_data['customer_id']
-            customer = session.get(Customer, customer_id)
+            # TO-DO: handle quantity for products
+            # note - maybe orders can only be created via shopping cart
 
-            if not customer:
-                raise ValueError(f"Customer with ID {customer_id} does not exist")
-            
+            # set order date to current date, randomize delivery date
+            order_date = datetime.today()
+            estimated_delivery_span = random.randint(2,5)
+            delivery_date = order_date + datetime.timedelta(days=estimated_delivery_span)
+                # if delivery date is a Sunday, deliver next day; no deliveries on Sundays!
+            if delivery_date.weekday() == 6:
+                delivery_date += datetime.timedelta(days=1)
+
+            # total_price
+            # note - total_price should be set calculating product prices times quantity, so I need that quantity column to be active somehow
+
             # Create a new order in the database
-            new_order = Order(customer_id=order_data['customer_id'], products=products)
+            new_order = Order(
+                customer_id=order_data['customer_id'],
+                products=products,
+                order_date=order_date,
+                delivery_date=delivery_date)
             session.add(new_order)
             session.commit()
 

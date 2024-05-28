@@ -7,13 +7,13 @@ from auth import token_auth
 
 # place order / create new order
 @token_auth.login_required
-def save():
+def create_order():
     try:
         raw_data = request.json
         logged_in_user = token_auth.current_user()
         raw_data['customer_id'] = logged_in_user.id
         order_data = order_schema.load(raw_data)
-        order_save = orderService.save(order_data)
+        order_save = orderService.create_order(order_data)
         return order_schema.jsonify(order_save), 201
     except ValidationError as err:
         return jsonify(err.messages), 400
