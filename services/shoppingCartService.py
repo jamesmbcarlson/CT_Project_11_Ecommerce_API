@@ -8,6 +8,7 @@ from models.customer import Customer
 from models.product import Product
 from models.shoppingCart import ShoppingCart
 from models.shoppingCartProducts import shopping_cart_products
+from models.orderProducts import order_products
 from services.productService import get_product
 from services.orderService import set_delivery_date
 
@@ -220,6 +221,9 @@ def empty_cart():
 def checkout():
     cart_id = get_current_cart()
     cart = get_cart(cart_id)
+    product_data = []
+    new_order = None
+
     # transfer shopping cart to order
     with Session(db.engine) as session:
         with session.begin():
@@ -234,20 +238,23 @@ def checkout():
                 product = session.execute(query).scalars().first() 
                 if product is None:
                     raise NoResultFound(f"Error: Product not found")
-                total_price += (int(product.price) * int(p[2]))
+                total_price += (float(product.price) * int(p[2]))
 
-            order_date = datetime.datetime.today()
+                # create data copies for order_products table
+                product_data.append((p[1], p[2]))
+
+
+            order_date = datetime.datetime.today().date()
             delivery_date = set_delivery_date(order_date)
 
             # transfer cart data to new order object
             new_order = Order(
-                customer_id=cart.id,
+                customer_id=cart.customer_id,
                 order_date=order_date,
                 delivery_date=delivery_date,
                 total_price=total_price,
                 cancelled=False)
             session.add(new_order)
-            session.commit()
 
             # delete cart
             delete_query = select(ShoppingCart).where(ShoppingCart.id == cart_id)
@@ -259,7 +266,18 @@ def checkout():
             set_current_cart(-1)
 
             session.commit()
-        session.refresh(new_order)        
+        session.refresh(new_order)      
+
+    with Session(db.engine) as session:
+        with session.begin():
+            # copy data from cart_product join table to order_product join table
+            for data in product_data:
+                add_new_order_prd_statement = order_products.insert().values(
+                        order_id=new_order.id,
+                        product_id=data[0],
+                        quantity=data[1])
+                db.session.execute(add_new_order_prd_statement)  
+            session.commit()
 
 # Get all shopping_carts in database
 def find_all(page=1, per_page=10):
