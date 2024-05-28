@@ -1,5 +1,6 @@
 from flask import request, jsonify
-from schemas.productSchema import product_schema, products_schema
+from sqlalchemy.exc import NoResultFound
+from schemas.productSchema import product_schema, products_schema, product_update_schema
 from services import productService
 from marshmallow import ValidationError
 from caching import cache
@@ -22,7 +23,7 @@ def save():
         return jsonify({"Message": "product_save is None"}), 400
     
 # get all products
-# @cache.cached(timeout=20) # took this out for smoother testing
+@cache.cached(timeout=20)
 def find_all():
     # get pagination parameters (or set to default)
     args = request.args
@@ -43,6 +44,27 @@ def get_product(product_id):
         }
         return resp, 404
     
-# TO-DO: update product at id
+# update product at id
+def update_product(product_id):
+    try:
+        # Validate and deserialize the request data
+        update_data = product_update_schema.load(request.json)
+        product_update = productService.update_product(product_id, update_data)
+        return product_schema.jsonify(product_update), 201
+    except (ValidationError, ValueError) as err:
+        return jsonify(err.messages), 400
+    except NoResultFound as err:
+        return jsonify({"error": str(err)}), 404
 
-# TO-DO: delete product at id
+
+# delete product at id
+def delete_product(product_id):
+    try:
+        productService.delete_product(product_id)
+        response = {
+            "status": "success",
+            "message": f"Product with ID {product_id} has been removed"
+        }
+        return response, 201
+    except Exception as err:
+        return jsonify({"error": str(err)}), 404

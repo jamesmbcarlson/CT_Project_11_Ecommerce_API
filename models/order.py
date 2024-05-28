@@ -17,9 +17,9 @@ class Order(Base):
     
     # not set in schema, but in system logic
     order_date: Mapped[datetime.date] = mapped_column(db.Date, nullable=False, default=lambda : datetime.datetime.date(datetime.datetime.now()))
-    delivery_date: Mapped[datetime.date] = mapped_column(db.DAte, nullable=False)
+    delivery_date: Mapped[datetime.date] = mapped_column(db.Date, nullable=False)
     total_price: Mapped[float] = mapped_column(db.Float, nullable=False)
-    cancelled: Mapped[bool] = mapped_column(db.Bool, nullable=False, default=False)
+    cancelled: Mapped[bool] = mapped_column(db.Boolean, nullable=False, default=False)
 
 
     # TO-DO: BONUSES:

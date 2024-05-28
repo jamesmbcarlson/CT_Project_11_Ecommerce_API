@@ -12,3 +12,22 @@ def encode_token(customer_id):
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
     return token
+
+def decode_token(token):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        now = datetime.now(timezone.utc).timestamp()
+        if payload.get('exp') < now:
+            print('Token has expired')
+            return None
+        # return customer_id
+        return payload.get('sub')
+    except jwt.ExpiredSignatureError:
+        print('Token has expired')
+        return None
+    except jwt.InvalidTokenError:
+        print('Invalid token')
+        return None
+    except Exception as e:
+        print(f"A error occurred: {e}")
+        return None

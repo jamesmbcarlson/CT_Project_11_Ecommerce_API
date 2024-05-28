@@ -15,4 +15,4 @@ order_blueprint.route('/<order_id>', methods=['GET'])(get_order) # view order at
 # view all orders for customer id
 # '/customer/<customer_id>'
 
-order_blueprint.route('/cancel/<order_id>', methods=['PUT'])() # cancel order at id
+# order_blueprint.route('/cancel/<order_id>', methods=['PUT'])() # cancel order at id

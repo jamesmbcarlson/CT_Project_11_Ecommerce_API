@@ -8,12 +8,15 @@ class ProductSchema(ma.Schema):
     price = fields.Float(required=True, validate=validate.Range(min=0))
     stock_quantity = fields.Integer(required=True, validate=validate.Range(min=0))
 
-    class Meta:
-        fields = ("id", "name", "price", "stock_quantity")
-
 class ProductIdSchema(ma.Schema):
     id = fields.Integer(required=True)
+
+class ProductUpdateSchema(ma.Schema):
+    name = fields.String(required=False)
+    price = fields.Float(required=False, validate=validate.Range(min=0))
+    stock_quantity = fields.Integer(required=False, validate=validate.Range(min=0))
 
 # Create instances of the schema
 product_schema = ProductSchema()
 products_schema = ProductSchema(many=True)
+product_update_schema = ProductUpdateSchema()

@@ -1,5 +1,6 @@
 from flask import request, jsonify
-from schemas.customerSchema import customer_input_schema, customer_output_schema, customers_schema, customer_login_schema
+from sqlalchemy.exc import NoResultFound
+from schemas.customerSchema import customer_input_schema, customer_output_schema, customers_schema, customer_update_schema, customer_login_schema
 from services import customerService
 from marshmallow import ValidationError
 from caching import cache
@@ -34,12 +35,33 @@ def get_customer(customer_id):
         }
         return resp, 404
 
-# TO-DO: update customer at id
+# update customer at id
+def update_customer(customer_id):
+    try:
+        # Validate and deserialize the request data
+        update_data = customer_update_schema.load(request.json)
+        customer_update = customerService.update_customer(customer_id, update_data)
+        return customer_output_schema.jsonify(customer_update), 201
+    except (ValidationError, ValueError) as err:
+        return jsonify(err.messages), 400
+    except NoResultFound as err:
+        return jsonify({"error": str(err)}), 404
 
-# TO-DO: delete customer at id
+
+# delete customer at id
+def delete_customer(customer_id):
+    try:
+        customerService.delete_customer(customer_id)
+        response = {
+            "status": "success",
+            "message": f"Customer with ID {customer_id} has been removed"
+        }
+        return response, 201
+    except Exception as err:
+        return jsonify({"error": str(err)}), 404
 
 # logging in
-def get_token():
+def login():
     try:
         customer_data = customer_login_schema.load(request.json)
         token = customerService.get_token(customer_data['username'], customer_data['password'])
