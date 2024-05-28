@@ -19,14 +19,14 @@ def create_cart():
         return jsonify({'error': str(err)}), 400
 
 # get one shopping_cart by ID
-def get_shopping_cart(cart_id):
-    shopping_cart = shoppingCartService.get_cart(cart_id)
+def get_shopping_cart(shopping_cart_id):
+    shopping_cart = shoppingCartService.get_cart(shopping_cart_id)
     if shopping_cart:
         return shopping_cart_schema.jsonify(shopping_cart)
     else:
         resp = {
             "status": "error",
-            "message": f"A shopping cart with ID {cart_id} does not exist"
+            "message": f"A shopping cart with ID {shopping_cart_id} does not exist"
         }
         return resp, 404
     
@@ -67,7 +67,7 @@ def checkout():
     try:
         shoppingCartService.checkout()
         return "You have successfully placed an order!"
-    except Exception as err:
+    except NoResultFound as err:
         return jsonify({"error": str(err)}), 400
 
 def set_active_cart(shopping_cart_id):

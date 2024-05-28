@@ -2,14 +2,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, and_
 from sqlalchemy.exc import NoResultFound
 from database import db
+import datetime
 from models.order import Order
 from models.customer import Customer
 from models.product import Product
 from models.shoppingCart import ShoppingCart
 from models.shoppingCartProducts import shopping_cart_products
 from services.productService import get_product
+from services.orderService import set_delivery_date
 
-# current cart is the cart_id functions should be managing
+# current_cart is the cart_id functions should be managing
 current_cart = -1
 
 def set_current_cart(id):
@@ -215,11 +217,49 @@ def empty_cart():
             session.commit()
 
 # place order with shopping cart data
-def checkout(cart_id):
+def checkout():
     cart_id = get_current_cart()
-    # transfer to order
-    # delete cart
-    set_current_cart(-1)
+    cart = get_cart(cart_id)
+    # transfer shopping cart to order
+    with Session(db.engine) as session:
+        with session.begin():
+            
+            # get total price of cart
+            total_price = 0.0
+            cart_query = select(shopping_cart_products).where(
+                shopping_cart_products.c.shopping_cart_id == cart_id)
+            products_in_cart = session.execute(cart_query).fetchall()
+            for p in products_in_cart:
+                query = select(Product).where(Product.id == p[1])
+                product = session.execute(query).scalars().first() 
+                if product is None:
+                    raise NoResultFound(f"Error: Product not found")
+                total_price += (int(product.price) * int(p[2]))
+
+            order_date = datetime.datetime.today()
+            delivery_date = set_delivery_date(order_date)
+
+            # transfer cart data to new order object
+            new_order = Order(
+                customer_id=cart.id,
+                order_date=order_date,
+                delivery_date=delivery_date,
+                total_price=total_price,
+                cancelled=False)
+            session.add(new_order)
+            session.commit()
+
+            # delete cart
+            delete_query = select(ShoppingCart).where(ShoppingCart.id == cart_id)
+            cart_to_delete = session.execute(delete_query).scalars().first()
+            if cart_to_delete is None:
+                raise NoResultFound(f"Shopping cart could not be found with ID {cart_id}")
+            # delete shopping cart
+            session.delete(cart_to_delete)
+            set_current_cart(-1)
+
+            session.commit()
+        session.refresh(new_order)        
 
 # Get all shopping_carts in database
 def find_all(page=1, per_page=10):

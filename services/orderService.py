@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import select
 from database import db
-from datetime import datetime
-from random import random
+import datetime, random
 from models.order import Order
 from models.customer import Customer
 from models.product import Product
@@ -61,6 +60,14 @@ def find_all(page=1, per_page=10):
     query = db.select(Order).limit(per_page).offset((page-1)*per_page)
     orders = db.session.execute(query).scalars().all()
     return orders
+
+def set_delivery_date(order_date):
+    estimated_delivery_span = random.randint(2,5)
+    delivery_date = order_date + datetime.timedelta(days=estimated_delivery_span)
+        # if delivery date is a Sunday, deliver next day; no deliveries on Sundays!
+    if delivery_date.weekday() == 6:
+        delivery_date += datetime.timedelta(days=1)
+    return delivery_date
 
 # TO-DO: 
     # track order
