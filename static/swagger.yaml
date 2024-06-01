@@ -241,6 +241,171 @@ paths:
           schema:
             $ref: "#/definitions/Order"
   /orders/track/{order_id}:
+    get:
+      summary: "Track Order Endpoint"
+      description: "Get status of order by ID"
+      parameters:
+        - name: order_id
+          in: path
+          description: "ID of order to fetch"
+      responses:
+        200:
+          description: 'Get Order Status'
+          examples:
+            application/json:
+              status: "Your order (ID 6) from 2024-05-22 was delivered on 2024-05-27!"
+        400:
+          description: 'Username Taken'
+          examples:
+            application/json:
+              error: "Order could not be found with ID 66"
+  /cart:
+    post:
+      summary: "Create Shopping Cart Endpoint"
+      description: "Creates a new shopping cart and sets it as the target for other shopping cart actions"
+      responses:
+        201:
+          description: 'Shopping Cart Created'
+          examples:
+            application/json:
+              success: "Shopping cart created! Add your products!"
+    get:
+      summary: "View Shopping Carts Endpoint"
+      description: "Get all open shopping carts"
+      parameters:
+        - in: query
+          name: page
+          type: "integer"
+          description: "Page of shopping cart objects"
+          required: false
+        - in: query
+          name: per_page
+          type: "integer"
+          description: "Number of shopping cart objects per page"
+          required: false
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/ShoppingCart"
+  /cart/{cart_id}:
+    get:
+      summary: "Get Shopping Cart Endpoint"
+      description: "Get one shopping cart's data by ID"
+      parameters:
+        - name: cart_id
+          in: path
+          description: "ID of shopping cart to fetch"
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            $ref: "#/definitions/ShoppingCart"
+    put:
+      summary: "Set Active Cart Endpoint"
+      description: "Set shopping cart at ID to target cart for other endpoints"
+      parameters:
+        - name: cart_id
+          in: path
+          description: "ID of cart to target"
+      responses:
+        200:
+          description: "Successful Response"
+          schema:
+            $ref: "#/definitions/ShoppingCart"
+  /cart/add/{product_id}:
+    put:
+      summary: "Add Product to Cart Endpoint"
+      description: "Add product to target cart by product ID"
+      parameters:
+        - name: product_id
+          in: path
+          description: "ID of product to add to cart"
+      responses:
+        200:
+          description: "Successful Response"
+          examples:
+            application/json:
+              success: "Product added!"
+        400:
+          description: "Product Not in Stock"
+          examples:
+            application/json:
+              error: "Not enough products in stock"
+  /cart/remove/{product_id}:
+    put:
+      summary: "Remove Product from Cart Endpoint"
+      description: "Remove product from target cart by product ID"
+      parameters:
+        - name: product_id
+          in: path
+          description: "ID of product to remove from cart"
+      responses:
+        200:
+          description: "Successful Response"
+          examples:
+            application/json:
+              success: "Product removed!"
+        404:
+          description: "Product Not in Cart"
+          examples:
+            application/json:
+              error: "Product not in cart!"
+  /cart/update/{product_id}:
+    put:
+      summary: "Update Product Quantity Endpoint"
+      description: "Update product quantity for item in cart"
+      parameters:
+        - name: product_id
+          in: path
+          description: "ID of product to update in cart"
+        - in: "body"
+          name: "body"
+          description: "Set quantity to amount specified"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              quantity:
+                type: "integer"
+                description: "New quantity for products"
+                example: "3"
+      responses:
+        200:
+          description: "Successful Response"
+          examples:
+            application/json:
+              success: "Product quantity modified!"
+        404:
+          description: "Product Not Found"
+          examples:
+            application/json:
+              error: "Product not found"
+  /cart/empty:
+    put:
+      summary: "Empty Shopping Cart Endpoint"
+      description: "Empties shopping cart of all products"
+      responses:
+        200:
+          description: 'Shopping Cart Emptied'
+          examples:
+            application/json:
+              success: "Your cart is now empty."
+  /cart/checkout:
+    delete:
+      summary: "Checkout Endpoint"
+      description: "Checkout with active cart, copying data to a new Order, and deleting a cart"
+      responses:
+        200:
+          description: 'Checkout Success'
+          examples:
+            application/json:
+              success: "You have successfully placed an order!"
+
+  
+
 definitions: 
   TokenCredentials:
     type: "object"
@@ -300,7 +465,8 @@ definitions:
         properties:
           id:
             type: "integer"
-            description: "Customer's unique ID"
+            description: "Customer's unique ID number"
+            example: "1"
             readonly: true
   CustomerRequest:
     allOf:
@@ -314,6 +480,10 @@ definitions:
   Product:
     type: "object"
     properties:
+      id:
+        type: "integer"
+        description: "Product's unique ID number"
+        example: "7"
       name:
         type: "string"
         description: "Product name"
@@ -326,6 +496,49 @@ definitions:
         type: "integer"
         description: "Number of products available"
         example: "42"
+  Order:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        description: "Order's unique ID number"
+        example: "42"
+      customer_id:
+        type: "integer"
+        description: "Associated customer's unique ID number"
+        example: "1"
+      products:
+        type: "array"
+        description: "List of ordered products"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              description: "Ordered product's unique ID number"
+              example: "7"
+  ShoppingCart:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        description: "Cart's unique ID number"
+        example: "4"
+      customer_id:
+        type: "integer"
+        description: "Associated customer's unique ID number"
+        example: "1"
+      products:
+        type: "array"
+        description: "List of products in cart"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+              description: "Product's unique ID number"
+              example: "7"
+
       
 securityDefinitions:
   bearerAuth:

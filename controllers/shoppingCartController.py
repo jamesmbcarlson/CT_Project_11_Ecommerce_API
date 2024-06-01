@@ -3,10 +3,10 @@ from sqlalchemy.exc import NoResultFound
 from schemas.shoppingCartSchema import shopping_cart_schema, shopping_carts_schema, update_product_quantity_schema
 from services import shoppingCartService
 from marshmallow import ValidationError
-from auth import token_auth
+from auth import token_auth, login_required
 
 # create empty shopping cart -- must be logged in to shop!
-@token_auth.login_required 
+@login_required
 def create_cart():
     try:
         logged_in_user = token_auth.current_user()
@@ -19,7 +19,7 @@ def create_cart():
         return jsonify({'error': str(err)}), 400
 
 # get one shopping_cart by ID
-@token_auth.login_required 
+@login_required
 def get_shopping_cart(shopping_cart_id):
     shopping_cart = shoppingCartService.get_cart(shopping_cart_id)
     if shopping_cart:
@@ -32,7 +32,7 @@ def get_shopping_cart(shopping_cart_id):
         return resp, 404
 
 # add product to cart with id
-@token_auth.login_required 
+@login_required
 def add_to_cart(product_id):
     # TO-DO: ADD VALIDATION
     try:
@@ -44,7 +44,7 @@ def add_to_cart(product_id):
         return jsonify({"error": str(err)}), 404
 
 # remove product from cart with id
-@token_auth.login_required 
+@login_required
 def remove_from_cart(product_id):
     # TO-DO: ADD VALIDATION
     try:
@@ -54,7 +54,7 @@ def remove_from_cart(product_id):
         return jsonify({"error": str(err)}), 404
 
 # change quantity of item in cart with id and json body
-@token_auth.login_required 
+@login_required
 def update_item_qty(product_id):
     try:
         update_data = update_product_quantity_schema.load(request.json)
@@ -64,7 +64,7 @@ def update_item_qty(product_id):
         return jsonify({"error": str(err)}), 404
 
 # empty cart of all products
-@token_auth.login_required 
+@login_required
 def empty_cart():
     try:
         shoppingCartService.empty_cart()
@@ -73,7 +73,7 @@ def empty_cart():
         return jsonify({"error": str(err)}), 404
 
 # checkout with cart, deleting cart, creating order
-@token_auth.login_required 
+@login_required
 def checkout():
     try:
         shoppingCartService.checkout()
@@ -82,7 +82,7 @@ def checkout():
         return jsonify({"error": str(err)}), 404
 
 # set cart to manage, with id
-@token_auth.login_required 
+@login_required
 def set_active_cart(shopping_cart_id):
     # TO-DO: ADD VALIDATION
     shoppingCartService.set_current_cart(shopping_cart_id)
@@ -90,7 +90,7 @@ def set_active_cart(shopping_cart_id):
     
 
 # get all shopping_carts
-@token_auth.login_required 
+@login_required
 def find_all():
     # get pagination parameters (or set to default)
     args = request.args

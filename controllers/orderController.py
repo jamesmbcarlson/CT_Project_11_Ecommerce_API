@@ -4,11 +4,11 @@ from schemas.orderSchema import order_schema, orders_schema
 from services import orderService
 from marshmallow import ValidationError
 from caching import cache
-from auth import token_auth
+from auth import login_required
 
 # place order / create new order
 # in this application, orders are placed via the shoppingCartService checkout method
-@token_auth.login_required
+@login_required
 def create_order():
     pass
     # try:
@@ -25,7 +25,7 @@ def create_order():
 
 # get all orders
 @cache.cached(timeout=20)
-@token_auth.login_required
+@login_required
 def find_all():
     # get pagination parameters (or set to default)
     args = request.args
@@ -35,7 +35,7 @@ def find_all():
     return orders_schema.jsonify(orders), 200
 
 # get one order by ID
-@token_auth.login_required
+@login_required
 def get_order(order_id):
     order = orderService.get_order(order_id)
     if order:
@@ -48,7 +48,7 @@ def get_order(order_id):
         return resp, 404
 
 # get status of order by id
-@token_auth.login_required
+@login_required
 def track_order(order_id):
     try:
         return orderService.track_order(order_id)

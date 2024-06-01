@@ -4,10 +4,10 @@ from schemas.productSchema import product_schema, products_schema, product_updat
 from services import productService
 from marshmallow import ValidationError
 from caching import cache
-from auth import token_auth
+from auth import login_required
 
 # create new product
-@token_auth.login_required 
+@login_required
 def create_product():
     try:
         # Validate and deserialize the request data
@@ -25,7 +25,7 @@ def create_product():
         return jsonify({"error": "product could not be saved"}), 400
     
 # get all products
-@token_auth.login_required
+@login_required
 @cache.cached(timeout=20)
 def find_all():
     # get pagination parameters (or set to default)
@@ -36,7 +36,7 @@ def find_all():
     return products_schema.jsonify(products), 200
 
 # get one product by ID
-@token_auth.login_required
+@login_required
 def get_product(product_id):
     product = productService.get_product(product_id)
     if product:
@@ -49,7 +49,7 @@ def get_product(product_id):
         return resp, 404
     
 # update product at id
-@token_auth.login_required
+@login_required
 def update_product(product_id):
     try:
         # Validate and deserialize the request data
@@ -63,7 +63,7 @@ def update_product(product_id):
 
 
 # delete product at id
-@token_auth.login_required
+@login_required
 def delete_product(product_id):
     try:
         productService.delete_product(product_id)

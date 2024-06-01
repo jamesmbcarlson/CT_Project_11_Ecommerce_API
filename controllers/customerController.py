@@ -4,10 +4,10 @@ from schemas.customerSchema import customer_input_schema, customer_output_schema
 from services import customerService
 from marshmallow import ValidationError
 from caching import cache
-from auth import token_auth
+from auth import login_required
 
 # create new customer
-@token_auth.login_required
+@login_required
 def create_customer():
     try:
         # Validate and deserialize the request data
@@ -21,7 +21,7 @@ def create_customer():
 
 # get all customers
 @cache.cached(timeout=20)
-@token_auth.login_required
+@login_required
 def get_all():
     # get pagination parameters (or set to default)
     args = request.args
@@ -33,7 +33,7 @@ def get_all():
     
 
 # get one customer by ID
-@token_auth.login_required
+@login_required
 def get_customer(customer_id):
     customer = customerService.get_customer(customer_id)
     if customer:
@@ -46,7 +46,7 @@ def get_customer(customer_id):
         return resp, 404
 
 # update customer at id
-@token_auth.login_required
+@login_required
 def update_customer(customer_id):
     try:
         # Validate and deserialize the request data
@@ -60,7 +60,7 @@ def update_customer(customer_id):
 
 
 # delete customer at id
-@token_auth.login_required
+@login_required
 def delete_customer(customer_id):
     try:
         customerService.delete_customer(customer_id)
